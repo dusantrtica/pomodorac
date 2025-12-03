@@ -19,9 +19,12 @@ const sessionSlice = createSlice({
     reducers: {
         setCurrentSessionType: (state, action: PayloadAction<SessionType>) => {
             state.currentSession = action.payload;
+            state.remainingTime = SESSION_LENGTHS[action.payload];
         },
         tick: (state) => {
-            state.remainingTime -= 1;
+            if (state.remainingTime > 0) {
+                state.remainingTime -= 1;
+            }
         },
     },
 });
