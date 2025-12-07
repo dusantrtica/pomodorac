@@ -9,3 +9,6 @@ export const SESSION_LENGTHS: Record<SessionType, number> = {
     short_break: SHORT_BREAK_SESSION_LENGTH,
     long_break: LONG_BREAK_SESSION_LENGTH,
 } as const;
+
+// number of short breaks before a long break
+export const SHORT_BREAK_COUNT = 3

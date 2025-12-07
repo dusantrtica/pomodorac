@@ -1,10 +1,11 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useTimer } from './hooks/useTimer';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { RootState } from './app/store';
 import { formatTime } from './components/counter/utils';
-import { setCurrentSessionType } from './features/pomodoro-session/sessionSlice';
+import { setCurrentSessionType, startSession, stopSession } from './features/pomodoro-session/sessionSlice';
 import type { SessionType } from './features/pomodoro-session/constants';
+import { tickAction } from './features/pomodoro-session/action-creators';
 
 type TabType = 'pomodoro' | 'shortBreak' | 'longBreak';
 
@@ -14,31 +15,38 @@ const tabToSession: Record<TabType, SessionType> = {
   longBreak: 'long_break',
 };
 
-function App() {
+export const WithTimer = ({ children }: { children: React.ReactNode }) => {
+  const { startTimer, stopTimer } = useTimer(tickAction);
+
+  useEffect(() => {
+    startTimer();
+
+    return () => {
+      stopTimer();
+    };
+  }, [startTimer, stopTimer]);
+
+  return children;
+}
+
+export const App = () => {
   const dispatch = useDispatch();
-  const { startTimer, stopTimer } = useTimer();
-  const [isRunning, setIsRunning] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>('pomodoro');
 
   const remainingTime = useSelector((state: RootState) => state.session.remainingTime);
+  const isRunning = useSelector((state: RootState) => state.session.isRunning);
 
   const handleStart = () => {
     if (isRunning) {
-      stopTimer();
-      setIsRunning(false);
+      dispatch(stopSession());
     } else {
-      startTimer();
-      setIsRunning(true);
+      dispatch(startSession());
     }
   };
 
   const handleTabChange = (tab: TabType) => {
     setActiveTab(tab);
     dispatch(setCurrentSessionType(tabToSession[tab]));
-    if (isRunning) {
-      stopTimer();
-      setIsRunning(false);
-    }
   };
 
   const getBgColor = () => {
@@ -126,25 +134,22 @@ function App() {
           <div className="flex justify-center gap-2 mb-8">
             <button
               onClick={() => handleTabChange('pomodoro')}
-              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${
-                activeTab === 'pomodoro' ? 'bg-black/15' : 'hover:bg-white/10'
-              }`}
+              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${activeTab === 'pomodoro' ? 'bg-black/15' : 'hover:bg-white/10'
+                }`}
             >
               Pomodoro
             </button>
             <button
               onClick={() => handleTabChange('shortBreak')}
-              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${
-                activeTab === 'shortBreak' ? 'bg-black/15' : 'hover:bg-white/10'
-              }`}
+              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${activeTab === 'shortBreak' ? 'bg-black/15' : 'hover:bg-white/10'
+                }`}
             >
               Short Break
             </button>
             <button
               onClick={() => handleTabChange('longBreak')}
-              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${
-                activeTab === 'longBreak' ? 'bg-black/15' : 'hover:bg-white/10'
-              }`}
+              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${activeTab === 'longBreak' ? 'bg-black/15' : 'hover:bg-white/10'
+                }`}
             >
               Long Break
             </button>
@@ -163,43 +168,8 @@ function App() {
             {isRunning ? 'Stop' : 'Start'}
           </button>
         </div>
-
-        {/* Current Task */}
-        <div className="text-center mt-8">
-          <p className="text-white/60 text-base mb-1">#1</p>
-          <p className="text-white text-lg">Uciti Istoriju</p>
-        </div>
-
-        {/* Tasks Section */}
-        <div className="mt-12">
-          <div className="flex items-center justify-between pb-3 border-b border-white/30">
-            <h2 className="text-white text-lg font-bold">Tasks</h2>
-            <button className="p-1.5 text-white/80 hover:text-white hover:bg-white/10 rounded transition-colors">
-              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-              </svg>
-            </button>
-          </div>
-
-          {/* Task Item */}
-          <div className="mt-4 bg-white rounded-lg p-4 flex items-center gap-3">
-            <div className="w-7 h-7 rounded-full border-2 border-gray-300 flex items-center justify-center cursor-pointer hover:border-gray-400 transition-colors">
-              <div className="w-4 h-4 rounded-full bg-gray-200"></div>
-            </div>
-            <div className="flex-1">
-              <p className="text-gray-800 font-medium">Uciti Istoriju</p>
-            </div>
-            <span className="text-gray-400 text-sm">0 / 1</span>
-            <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded transition-colors">
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z" />
-              </svg>
-            </button>
-          </div>
-        </div>
       </main>
     </div>
   );
 }
 
-export default App;
