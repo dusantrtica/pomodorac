@@ -1,5 +1,5 @@
 import { expect, describe, it } from "vitest";
-import sessionSlice, { getNextSession, initialState, startSession, stopSession } from "./sessionSlice";
+import sessionSlice, { getNextSession, startSession, stopSession } from "./sessionSlice";
 import { setCurrentSessionType } from "./sessionSlice";
 import { SESSION_LENGTHS, type SessionType } from "./constants";
 import {  type InitialState } from "./sessionSlice";
@@ -36,7 +36,6 @@ describe('sessionSlice', () => {
             isRunning: true,
         }
         const state = sessionSlice(initialState, tickAction());
-        
         expect(state.currentSession).toBe('short_break');
         expect(state.remainingTime).toBe(SESSION_LENGTHS['short_break']);
         expect(state.pastSessions).toEqual(['focus']);
