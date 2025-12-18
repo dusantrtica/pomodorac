@@ -13,6 +13,7 @@
   "dependencies": {
     "@headlessui/react": "^2.2.9",
     "@reduxjs/toolkit": "^2.11.0",
+    "lucide-react": "^0.562.0",
     "ramda": "^0.32.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

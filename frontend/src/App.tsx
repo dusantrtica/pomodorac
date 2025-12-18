@@ -7,6 +7,7 @@ import { setCurrentSessionType, startSession, stopSession } from './features/pom
 import type { SessionType } from './features/pomodoro-session/constants';
 import { tickAction } from './features/pomodoro-session/action-creators';
 import { Button } from '@headlessui/react';
+import TodoSection from './components/todos/TodoSection';
 
 type TabType = 'pomodoro' | 'shortBreak' | 'longBreak';
 
@@ -113,6 +114,7 @@ export const App = () => {
           </Button>
         </div>
       </main>
+        <TodoSection />
     </div>
   );
 }
