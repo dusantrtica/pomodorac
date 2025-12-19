@@ -1,23 +1,25 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { Todo } from "./todo";
-
-export type InitialState = {
-    todos: Todo[];
-}
-
-const initialState: InitialState = {
-    todos: [],
-}
+import type { CreateTodoListPayload, TodoList } from "./todo";
+import { loadTodosFromLocalStorage } from "../../app/persistence";
 
 const todoSlice = createSlice({
     name: 'todos',
-    initialState: [],
+    initialState: () => ({
+        todoLists: loadTodosFromLocalStorage(),
+    }),
     reducers: {
-        addTodo: (state, action: PayloadAction<Todo>) => {
-            state.push(action.payload);
+        addTodoList: (state, action: PayloadAction<CreateTodoListPayload>) => {
+            const id = `new_${state.todoLists.length + 1}`;
+            state.todoLists.push({ id, title: action.payload.title, todos: [] });
         },
-    },
-}); 
+        deleteTodoList: (state, action: PayloadAction<string>) => {
+            state.todoLists = state.todoLists.filter((list: TodoList) => list.id !== action.payload);
+        },
+        updateTodoList: (state, action: PayloadAction<TodoList>) => {
+            state.todoLists = state.todoLists.map((list: TodoList) => list.id === action.payload.id ? action.payload : list);
+        },
+    },    
+});
 
-export const { addTodo } = todoSlice.actions;
+export const { addTodoList, deleteTodoList, updateTodoList } = todoSlice.actions;
 export default todoSlice.reducer;

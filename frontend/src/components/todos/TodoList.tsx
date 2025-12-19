@@ -1,48 +1,66 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button, Disclosure } from "@headlessui/react";
 import { ChevronDown, Trash2, X } from "lucide-react";
+import type { TodoList } from "../../features/todos/todo";
+import { updateTodoList } from "../../features/todos/todoSlice";
+import { useDispatch } from "react-redux";
 
 interface TodoListProps {
   onDelete?: () => void;
+  todoList: TodoList;
 }
 
-export default function TodoList({ onDelete }: TodoListProps) {
-  const [title, setTitle] = useState("My Todo List");
+export default function TodoList({ onDelete, todoList: initialTodoList }: TodoListProps) {
+  const [title, setTitle] = useState(initialTodoList.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [todos, setTodos] = useState([
-    { id: 1, title: "Buy groceries", completed: false },
-    { id: 2, title: "Finish React assignment", completed: true },
-    { id: 3, title: "Go to the gym", completed: false },
-  ]);
+  const [todoList, setTodoList] = useState(initialTodoList);
+  const dispatch = useDispatch();
 
   const [newTodo, setNewTodo] = useState("");
 
-  const toggleTodo = (id: number) => {
-    setTodos((prev) =>
-      prev.map((todo) =>
-        todo.id === id ? { ...todo, completed: !todo.completed } : todo
+  const toggleTodo = (id: string) => {
+    setTodoList((prev: TodoList) =>({
+      ...prev,
+      todos: prev.todos.map((todo) =>
+        todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
       )
-    );
+    }));
   };
 
-  const deleteTodo = (id: number) => {
-    setTodos((prev) => prev.filter((todo) => todo.id !== id));
+  const deleteTodo = (id: string) => {
+    setTodoList((prev: TodoList) => ({
+      ...prev,
+      todos: prev.todos.filter((todo) => todo.id !== id)
+    }));
   };
 
   const addTodo = () => {
     if (!newTodo.trim()) return;
 
-    setTodos((prev) => [
+    setTodoList((prev: TodoList) => ({
       ...prev,
-      {
-        id: Date.now(),
-        title: newTodo.trim(),
-        completed: false,
-      },
-    ]);
+      todos: [
+        ...prev.todos,
+        {
+          id: `new_${prev.todos.length + 1}`,
+          title: newTodo.trim(),
+          isCompleted: false,
+        },
+      ],
+    }));
 
-    setNewTodo("");
+    setNewTodo("");    
   };
+
+  useEffect(() => {
+    dispatch(updateTodoList(todoList));
+  }, [todoList]);
+
+  const handleChangeTitle = () => {
+    if(title.trim() === "") return;
+    dispatch(updateTodoList({ ...todoList, title: title }));
+    setIsEditingTitle(false);
+  }
 
   return (
     <div className="w-80">
@@ -60,7 +78,7 @@ export default function TodoList({ onDelete }: TodoListProps) {
                     onBlur={() => setIsEditingTitle(false)}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
-                        setIsEditingTitle(false);
+                        handleChangeTitle();
                       }
                     }}
                     onClick={(e) => e.stopPropagation()}
@@ -115,20 +133,20 @@ export default function TodoList({ onDelete }: TodoListProps) {
 
             <Disclosure.Panel className="border-t border-gray-200 px-4 py-3">
               <ul className="space-y-2">
-                {todos.map((todo) => (
+                {todoList.todos.map((todo) => (
                   <li
                     key={todo.id}
                     className="group flex items-center gap-3 rounded-xl px-2 py-1 hover:bg-gray-50"
                   >
                     <input
                       type="checkbox"
-                      checked={todo.completed}
+                      checked={todo.isCompleted}
                       onChange={() => toggleTodo(todo.id)}
                       className="h-4 w-4 rounded border-gray-300 text-black focus:ring-0"
                     />
                     <span
                       className={`flex-1 text-sm transition-colors ${
-                        todo.completed
+                        todo.isCompleted
                           ? "line-through text-gray-400"
                           : "text-gray-800"
                       }`}
