@@ -1,6 +1,6 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { useTimer } from './hooks/useTimer';
-import { useState, useEffect } from 'react';
+import { useEffect } from 'react';
 import type { RootState } from './app/store';
 import { formatTime } from './components/counter/utils';
 import { setCurrentSessionType, startSession, stopSession } from './features/pomodoro-session/sessionSlice';
@@ -8,14 +8,6 @@ import type { SessionType } from './features/pomodoro-session/constants';
 import { tickAction } from './features/pomodoro-session/action-creators';
 import { Button } from '@headlessui/react';
 import TodoSection from './components/todos/TodoSection';
-
-type TabType = 'pomodoro' | 'shortBreak' | 'longBreak';
-
-const tabToSession: Record<TabType, SessionType> = {
-  pomodoro: 'focus',
-  shortBreak: 'short_break',
-  longBreak: 'long_break',
-};
 
 export const WithTimer = ({ children }: { children: React.ReactNode }) => {
   const { startTimer, stopTimer } = useTimer(tickAction);
@@ -33,10 +25,16 @@ export const WithTimer = ({ children }: { children: React.ReactNode }) => {
 
 export const App = () => {
   const dispatch = useDispatch();
-  const [activeTab, setActiveTab] = useState<TabType>('pomodoro');
+  const activeTab = useSelector((state: RootState) => state.session.currentSession);
 
   const remainingTime = useSelector((state: RootState) => state.session.remainingTime);
   const isRunning = useSelector((state: RootState) => state.session.isRunning);
+
+  if(isRunning) {
+    document.title = `${formatTime(remainingTime)} - ${activeTab}`;
+  } else {
+    document.title = `Paused - ${activeTab}`;
+  }
 
   const handleStart = () => {
     if (isRunning) {
@@ -46,16 +44,15 @@ export const App = () => {
     }
   };
 
-  const handleTabChange = (tab: TabType) => {
-    setActiveTab(tab);
-    dispatch(setCurrentSessionType(tabToSession[tab]));
-  };
+  const handleTabChange = (tab: SessionType) => {    
+    dispatch(setCurrentSessionType(tab));
+  };  
 
   const getBgColor = () => {
     switch (activeTab) {
-      case 'shortBreak':
+      case 'short_break':
         return 'bg-short-break';
-      case 'longBreak':
+      case 'long_break':
         return 'bg-long-break';
       default:
         return 'bg-pomodoro';
@@ -64,9 +61,9 @@ export const App = () => {
 
   const getButtonTextColor = () => {
     switch (activeTab) {
-      case 'shortBreak':
+      case 'short_break':
         return 'text-short-break';
-      case 'longBreak':
+      case 'long_break':
         return 'text-long-break';
       default:
         return 'text-pomodoro';
@@ -79,22 +76,22 @@ export const App = () => {
         <div className="bg-white/10 rounded-lg p-8 text-center">
           <div className="flex justify-center gap-2 mb-8">
             <Button
-              onClick={() => handleTabChange('pomodoro')}
-              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${activeTab === 'pomodoro' ? 'bg-black/15' : 'hover:bg-white/10'
+              onClick={() => handleTabChange('focus')}
+              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${activeTab === 'focus' ? 'bg-black/15' : 'hover:bg-white/10'
                 }`}
             >
               Pomodoro
             </Button>
             <Button
-              onClick={() => handleTabChange('shortBreak')}
-              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${activeTab === 'shortBreak' ? 'bg-black/15' : 'hover:bg-white/10'
+              onClick={() => handleTabChange('short_break')}
+              className={`px-4 py-1.5 rounded-md text-white font-medium transition-colors ${activeTab === 'short_break' ? 'bg-black/15' : 'hover:bg-white/10'
                 }`}
             >
               Short Break
             </Button>
             <Button
-              onClick={() => handleTabChange('longBreak')}
-              className={`px-4 py-2 rounded-md text-white font-medium transition-colors ${activeTab === 'longBreak' ? 'bg-black/15' : 'hover:bg-white/10'
+              onClick={() => handleTabChange('long_break')}
+              className={`px-4 py-2 rounded-md text-white font-medium transition-colors ${activeTab === 'long_break' ? 'bg-black/15' : 'hover:bg-white/10'
                 }`}
             >
               Long Break
