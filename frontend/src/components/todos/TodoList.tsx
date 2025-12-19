@@ -1,64 +1,58 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Button, Disclosure } from "@headlessui/react";
 import { ChevronDown, Trash2, X } from "lucide-react";
 import type { TodoList } from "../../features/todos/todo";
-import { updateTodoList } from "../../features/todos/todoSlice";
-import { useDispatch } from "react-redux";
+
 
 interface TodoListProps {
   onDelete?: () => void;
   todoList: TodoList;
+  onUpdate?: (list: TodoList) => void;
 }
 
-export default function TodoList({ onDelete, todoList: initialTodoList }: TodoListProps) {
-  const [title, setTitle] = useState(initialTodoList.title);
+export default function TodoList({ onDelete, todoList, onUpdate }: TodoListProps) {
+  const [title, setTitle] = useState(todoList.title);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
-  const [todoList, setTodoList] = useState(initialTodoList);
-  const dispatch = useDispatch();
-
+  
   const [newTodo, setNewTodo] = useState("");
 
   const toggleTodo = (id: string) => {
-    setTodoList((prev: TodoList) =>({
-      ...prev,
-      todos: prev.todos.map((todo) =>
-        todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
-      )
-    }));
+    const updatedTodoList = {
+        ...todoList,
+        todos: todoList.todos.map((todo) =>
+            todo.id === id ? { ...todo, isCompleted: !todo.isCompleted } : todo
+        )
+    }
+    onUpdate?.(updatedTodoList);
   };
 
   const deleteTodo = (id: string) => {
-    setTodoList((prev: TodoList) => ({
-      ...prev,
-      todos: prev.todos.filter((todo) => todo.id !== id)
-    }));
+    const updatedTodoList = {
+        ...todoList,
+        todos: todoList.todos.filter((todo) => todo.id !== id)
+    }
+    onUpdate?.(updatedTodoList);
   };
 
   const addTodo = () => {
     if (!newTodo.trim()) return;
 
-    setTodoList((prev: TodoList) => ({
-      ...prev,
-      todos: [
-        ...prev.todos,
-        {
-          id: `new_${prev.todos.length + 1}`,
-          title: newTodo.trim(),
-          isCompleted: false,
-        },
-      ],
-    }));
+    const updatedTodoList = {
+        ...todoList,
+        todos: [...todoList.todos, { id: `new_${todoList.todos.length + 1}`, title: newTodo.trim(), isCompleted: false }]
+    }
+    onUpdate?.(updatedTodoList);
 
     setNewTodo("");    
   };
 
-  useEffect(() => {
-    dispatch(updateTodoList(todoList));
-  }, [todoList]);
-
   const handleChangeTitle = () => {
     if(title.trim() === "") return;
-    dispatch(updateTodoList({ ...todoList, title: title }));
+    const updatedTodoList = {
+        ...todoList,
+        title: title
+    }
+    onUpdate?.(updatedTodoList);
     setIsEditingTitle(false);
   }
 

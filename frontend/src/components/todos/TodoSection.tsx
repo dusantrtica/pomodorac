@@ -2,7 +2,7 @@ import { Plus } from "lucide-react";
 import TodoList from "./TodoList";
 import { useDispatch, useSelector } from "react-redux";
 import type { RootState } from "../../app/store";
-import { addTodoList, deleteTodoList } from "../../features/todos/todoSlice";
+import { addTodoList, deleteTodoList, updateTodoList } from "../../features/todos/todoSlice";
 import type { CreateTodoListPayload, TodoList as TodoListType } from "../../features/todos/todo";
 
 export default function TodoSection() {
@@ -16,11 +16,15 @@ export default function TodoSection() {
         dispatch(deleteTodoList(id));
     };
 
+    const updateList = (list: TodoListType) => {
+        dispatch(updateTodoList(list));
+    };
+
     return (
         <div className="flex items-start gap-4 p-4 overflow-x-auto">
             {todoLists.map((list: TodoListType) => (
                 <div key={list.id} className="flex-shrink-0">
-                    <TodoList onDelete={() => deleteList(list.id)} todoList={list} />
+                    <TodoList onDelete={() => deleteList(list.id)} todoList={list} onUpdate={updateList}/>
                 </div>
             ))}
             <button
