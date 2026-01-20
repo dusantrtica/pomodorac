@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { v4 as uuidv4 } from 'uuid';
 import { Button, Disclosure } from "@headlessui/react";
 import { ChevronDown, Trash2, X } from "lucide-react";
 import type { TodoList } from "../../features/todos/todo";
@@ -39,7 +40,7 @@ export default function TodoList({ onDelete, todoList, onUpdate }: TodoListProps
 
     const updatedTodoList = {
         ...todoList,
-        todos: [...todoList.todos, { id: `new_${todoList.todos.length + 1}`, title: newTodo.trim(), isCompleted: false }]
+        todos: [...todoList.todos, { id: `new_${uuidv4()}`, title: newTodo.trim(), isCompleted: false }]
     }
     onUpdate?.(updatedTodoList);
 

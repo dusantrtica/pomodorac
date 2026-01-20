@@ -1,6 +1,7 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
 import type { CreateTodoListPayload, TodoList } from "./todo";
 import { loadTodosFromLocalStorage } from "../../app/persistence";
+import { v4 as uuidv4 } from 'uuid';
 
 const todoSlice = createSlice({
     name: 'todos',
@@ -9,7 +10,7 @@ const todoSlice = createSlice({
     }),
     reducers: {
         addTodoList: (state, action: PayloadAction<CreateTodoListPayload>) => {
-            const id = `new_${state.todoLists.length + 1}`;
+            const id = `new_${uuidv4()}`;
             state.todoLists.push({ id, title: action.payload.title, todos: [] });
         },
         deleteTodoList: (state, action: PayloadAction<string>) => {
