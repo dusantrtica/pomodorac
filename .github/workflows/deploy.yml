@@ -32,9 +32,12 @@ jobs:
 
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+        working-directory: frontend
+
 
       - name: Build frontend
         run: pnpm --dir frontend build
+        working-directory: frontend
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
