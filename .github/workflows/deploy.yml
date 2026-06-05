@@ -36,8 +36,7 @@ jobs:
 
 
       - name: Build frontend
-        run: pnpm --dir frontend build
-        working-directory: frontend
+        run: pnpm --dir frontend build        
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
