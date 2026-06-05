@@ -6,7 +6,7 @@ const todoListener = createListenerMiddleware();
 
 todoListener.startListening({
     matcher: isAnyOf(addTodoList, updateTodoList, deleteTodoList),
-    effect: async (action, listenerApi) => {
+    effect: async (_, listenerApi) => {
         saveTodosToLocalStorage((listenerApi.getState() as RootState).todos.todoLists);
     },
 });
